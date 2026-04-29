@@ -1,0 +1,104 @@
+
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+
+    volumes:
+      - /mnt/d/project1/datalake/minio-data:/data
+
+    command: server /data --console-address ":9001"
+
+  pipeline:
+    build: .
+    container_name: gold_pipeline
+    depends_on:
+      - minio
+    env_file:
+      - ./configs/.env
+    environment:
+      MINIO_ENDPOINT: minio:9000
+    command: ["sleep", "infinity"]
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+
+  airflow-init:
+    image: apache/airflow:2.9.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./:/app
+    command: >
+      bash -c "airflow db init &&
+      airflow users create --username admin --password admin123 --firstname le --lastname kien --role Admin --email admin@example.com || true"
+
+  airflow-scheduler:
+    image: apache/airflow:2.9.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    container_name: airflow_scheduler
+    restart: always
+    env_file:
+      - ./configs/.env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./:/app
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE_LOAD_EXAMPLES: "False"
+    command: scheduler  
+
+  airflow-webserver:
+    image: apache/airflow:2.9.0
+    container_name: airflow_web
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-scheduler:
+        condition: service_started
+    restart: always
+
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./configs/.env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./:/app
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE_LOAD_EXAMPLES: "False"
+    command: webserver
+
+volumes:
+  postgres-db-volume:
+  

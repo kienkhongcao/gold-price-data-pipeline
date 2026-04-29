@@ -1,0 +1,8 @@
+pandas
+numpy
+python-dotenv
+minio
+requests
+scikit-learn
+xgboost==1.7.6
+joblib
