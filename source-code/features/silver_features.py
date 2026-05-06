@@ -29,7 +29,7 @@ client = Minio(
 	MINIO_ENDPOINT,
 	access_key = MINIO_ACCESS_KEY,
 	secret_key = MINIO_SECRET_KEY,
-	secure = True
+	secure = False
 )
 
 #loop đọc và load file từ minio 

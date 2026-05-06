@@ -10,6 +10,15 @@ output_dir = Path("eda/plots")
 output_dir.mkdir(parents=True, exist_ok=True)
 
 def plot_chart(df: pd.DataFrame, feature: str, target: str):
+
+	data = df[[feature, target]].copy()
+
+	data[feature] = pd.to_numeric(data[feature], errors='coerce')
+	data[target] = pd.to_numeric(data[target], errors='coerce')
+
+	data = data.dropna()
+	data = data[~np.isinf(data).any(axis=1)]
+
 	x = df[feature]
 	y = df[target]
 
@@ -37,10 +46,16 @@ def plot_chart(df: pd.DataFrame, feature: str, target: str):
 	print(f"[INFO] đã lưu {output_file}")
 
 def main():
-	df, target, features = load_data()
+	df = load_data()
+
+	target = "Gold"
+	features = ['Dxy', 'FedFunds', 'CPI', 'DGS10']
 
 	print(f"[INFO] target: {target}")
 	print(f"[INFO] features: {features}")
+	print(df.dtypes)
+	print(df.head())
+	print(df.describe())
 
 	for feature in features:
 		plot_chart(df, feature, target)

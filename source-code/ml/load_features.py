@@ -56,6 +56,9 @@ def load_data():
 	PREFIX = get_lastest_gold_prefix()
 	df = read_gold_features(PREFIX)
 	df = df.sort_values("Date").set_index("Date")
+	marco_cols = ['Dxy','FedFunds','CPI','DGS10']
+	df[marco_cols]= df[marco_cols].ffill()
+	df = df.dropna()
 
 	return df
 '''	target = "Gold"
