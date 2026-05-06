@@ -78,8 +78,10 @@ docker-compose up --build
 
 ### 3. Trigger DAG
 Open Airflow UI
+
 Enable DAG: gold-price-pipeline
-(chạy lại pipeline và thêm ảnh trigger UI airflow vào đây)
+
+![Airflow UI](images/airflow_ui)
 
 ## #Key learning
 - Getting more influence on how to design end-to-end pipeline
