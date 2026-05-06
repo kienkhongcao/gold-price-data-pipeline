@@ -81,7 +81,13 @@ Open Airflow UI
 
 Enable DAG: gold-price-pipeline
 
-![Airflow UI](images/airflow_ui)
+![Airflow UI](images/airflow_ui.png)
+
+### 4. Output
+- Raw data (Minio)
+- Clean data (Silver)
+- Features (Ml ready dataset)
+- Prediction -> output file/storage
 
 ## #Key learning
 - Getting more influence on how to design end-to-end pipeline
