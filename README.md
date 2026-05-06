@@ -14,6 +14,30 @@ This project builds an automated pipeline to:
 - Generate features for machine learning
 - Predict gold price trends
 
+## #Data Flow
+1. Ingestion
+    - Fetch data from multiple sources , APIs (gold, USD, oil)
+    - Apply retry, logging
+    - Store raw data -> Minio (Bronze)
+2. Storage (Bronze)
+    - Immutable raw data
+    - Partition by date
+3. Transformation (Silver)
+   - Clean & Normalize data
+   - Handle missing values
+   - Align time-series
+4. Feature Engineering
+   - Lag features (t-1, t-7,..)
+   - Rolling mean, std...
+   - Output ML-ready dataset
+5. ML Pipeline
+   - Train model
+   - Evaluate performance
+   - Save model artifacts
+6. Orchestration
+   - Airlow DAG schedules pipeline (daily)
+   - Manage dependencies & retries
+
 ![Pipeline flow](images/pipelineflow.png)
 
 ## #Tech stack
@@ -44,14 +68,17 @@ gold-price-pred
 
 ### 1. Clone repo
 git clone ...
-
+cd gold-price-pred
 ### 2. Start services
-docker-compose up -d
+docker-compose up --build
+    
+- Airflow UI: http://localhost:8080
+   
+- Minio UI: http://localhost:9000
 
-### 3. Access Airflow UI
-http://localhost:8080
-
-### 4. Trigger DAG
+### 3. Trigger DAG
+Open Airflow UI
+Enable DAG: gold-price-pipeline
 (chạy lại pipeline và thêm ảnh trigger UI airflow vào đây)
 
 ## #Key learning
